@@ -2,11 +2,17 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cleantrack.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cleantrack.db")
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# Render and some platforms still provide the legacy "postgres://" prefix.
+# SQLAlchemy 2.x requires "postgresql://".
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# check_same_thread is a SQLite-only option — omit it for PostgreSQL.
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
