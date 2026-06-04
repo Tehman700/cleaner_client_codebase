@@ -11,7 +11,7 @@ interface Props {
   sched: ScheduleEntry;
 }
 
-export default function JobCard({ day, plot, sched }: Props) {
+export default function JobCard({ day, plot }: Props) {
   const { jobs, toggleTask, uploadPhoto } = useApp();
   const [open,    setOpen]    = useState(true);
   const [lightbox, setLightbox] = useState<{ src: string; label: string } | null>(null);

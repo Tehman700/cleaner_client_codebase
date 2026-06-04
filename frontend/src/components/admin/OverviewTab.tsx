@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { todayKey, dayLabel, jobKey, plotStatus } from '../../utils/helpers';
+import { todayKey, jobKey, plotStatus } from '../../utils/helpers';
 import DayPills from '../shared/DayPills';
 import StatusBadge from '../shared/StatusBadge';
 

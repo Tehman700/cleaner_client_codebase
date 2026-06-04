@@ -21,7 +21,7 @@ export function jobKey(day: string, plotId: string): string {
 }
 
 export function plotStatus(
-  day: string,
+  _day: string,
   plot: Plot,
   job: Job | undefined,
 ): 'pending' | 'progress' | 'done' {
