@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
+import { trackEvent } from '../../utils/analytics';
 import type { Role } from '../../types';
 
 interface Props {
@@ -32,6 +33,7 @@ export default function AuthScreen({ onLogin }: Props) {
     try {
       const res = await api.verifyPin(role, p);
       if (res.success) {
+        trackEvent('login', role);
         await onLogin(role);
       } else {
         setError('Incorrect PIN. Try again.');

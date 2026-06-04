@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { api } from '../api/client';
 import { jobKey } from '../utils/helpers';
+import { trackEvent } from '../utils/analytics';
 import type { Plot, ScheduleEntry, Job } from '../types';
 
 interface AppContextType {
@@ -59,7 +60,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadJobsForDay = useCallback(async (day: string) => {
     setLoading(true);
     try {
-      // use functional update to read latest schedule without stale closure
       let entries: ScheduleEntry[] = [];
       setSchedule(s => { entries = s.filter(e => e.day === day); return s; });
       if (!entries.length) return;
@@ -77,39 +77,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const createPlot = useCallback(async (data: { name: string; address: string; tasks: string[] }) => {
     const created = await api.createPlot(data);
     setPlots(prev => [...prev, created]);
+    trackEvent('plot_created', 'admin', { plot_name: data.name });
   }, []);
 
   const updatePlot = useCallback(async (id: string, data: { name?: string; address?: string; tasks?: string[] }) => {
     const updated = await api.updatePlot(id, data);
     setPlots(prev => prev.map(p => p.id === id ? updated : p));
+    trackEvent('plot_updated', 'admin', { plot_id: id });
   }, []);
 
   const deletePlot = useCallback(async (id: string) => {
     await api.deletePlot(id);
     setPlots(prev => prev.filter(p => p.id !== id));
     setSchedule(prev => prev.filter(s => s.plotId !== id));
+    trackEvent('plot_deleted', 'admin', { plot_id: id });
   }, []);
 
   const addSchedule = useCallback(async (day: string, plotId: string) => {
     const entry = await api.addSchedule(day, plotId);
     setSchedule(prev => [...prev, { id: entry.id, day: entry.day as ScheduleEntry['day'], plotId: entry.plot_id }]);
+    trackEvent('schedule_added', 'admin', { day, plot_id: plotId });
   }, []);
 
   const removeSchedule = useCallback(async (id: string) => {
     await api.removeSchedule(id);
     setSchedule(prev => prev.filter(s => s.id !== id));
+    trackEvent('schedule_removed', 'admin', { schedule_id: id });
   }, []);
 
   const toggleTask = useCallback(async (day: string, plotId: string, taskIdx: number) => {
-    const key     = jobKey(day, plotId);
-    const current = jobs[key] ?? { tasks: {}, photo: null, photoName: null };
+    const key      = jobKey(day, plotId);
+    const current  = jobs[key] ?? { tasks: {}, photo: null, photoName: null };
     const newTasks = { ...current.tasks, [taskIdx]: !current.tasks[taskIdx] };
-    const optimistic = { ...current, tasks: newTasks };
 
-    setJobs(prev => ({ ...prev, [key]: optimistic }));
+    setJobs(prev => ({ ...prev, [key]: { ...current, tasks: newTasks } }));
     try {
       const updated = await api.updateJob(day, plotId, { tasks: newTasks });
       setJobs(prev => ({ ...prev, [key]: normaliseJob(updated) }));
+      trackEvent('task_completed', 'cleaner', { day, plot_id: plotId, task_index: taskIdx, checked: newTasks[taskIdx] });
     } catch {
       setJobs(prev => ({ ...prev, [key]: current }));
       throw new Error('Failed to save task');
@@ -119,12 +124,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const uploadPhoto = useCallback(async (day: string, plotId: string, photo: string, photoName: string) => {
     const key     = jobKey(day, plotId);
     const current = jobs[key] ?? { tasks: {}, photo: null, photoName: null };
-    const optimistic = { ...current, photo, photoName };
 
-    setJobs(prev => ({ ...prev, [key]: optimistic }));
+    setJobs(prev => ({ ...prev, [key]: { ...current, photo, photoName } }));
     try {
       const updated = await api.updateJob(day, plotId, { photo, photo_name: photoName });
       setJobs(prev => ({ ...prev, [key]: normaliseJob(updated) }));
+      trackEvent('photo_uploaded', 'cleaner', { day, plot_id: plotId });
     } catch {
       setJobs(prev => ({ ...prev, [key]: current }));
       throw new Error('Failed to upload photo');

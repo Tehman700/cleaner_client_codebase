@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, engine
-from app.routers import auth, plots, schedule, jobs
+from app.routers import auth, plots, schedule, jobs, analytics
 
 Base.metadata.create_all(bind=engine)
 
@@ -34,6 +34,7 @@ app.include_router(auth.router)
 app.include_router(plots.router)
 app.include_router(schedule.router)
 app.include_router(jobs.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health")

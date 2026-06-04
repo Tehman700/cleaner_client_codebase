@@ -25,6 +25,9 @@ backend/build/
 backend/dist/
 backend/*.egg-info/
 
+# ── Analytics dashboard (local only, never push) ─────────────
+analytics_traffic/
+
 # ── Frontend ──────────────────────────────────────────────────
 frontend/node_modules/
 frontend/dist/

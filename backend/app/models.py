@@ -1,5 +1,6 @@
 import json
-from sqlalchemy import Column, String, Text, Boolean
+from datetime import datetime
+from sqlalchemy import Column, String, Text, DateTime, Integer
 from app.database import Base
 
 
@@ -48,3 +49,21 @@ class Job(Base):
     @tasks.setter
     def tasks(self, value: dict):
         self.tasks_json = json.dumps(value)
+
+
+class AnalyticsEvent(Base):
+    __tablename__ = "analytics_events"
+
+    id         = Column(Integer, primary_key=True, autoincrement=True)
+    event_type = Column(String, nullable=False, index=True)
+    role       = Column(String, nullable=True)
+    meta_json  = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    @property
+    def meta(self) -> dict:
+        return json.loads(self.meta_json) if self.meta_json else {}
+
+    @meta.setter
+    def meta(self, value: dict):
+        self.meta_json = json.dumps(value) if value else None
