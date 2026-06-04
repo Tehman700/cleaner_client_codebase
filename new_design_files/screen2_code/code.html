@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CleanTracking Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#e2e2e2",
+                        "on-surface-variant": "#4c4546",
+                        "surface-container-high": "#eae8e6",
+                        "error": "#ba1a1a",
+                        "outline": "#7e7576",
+                        "secondary-container": "#ece1d6",
+                        "inverse-surface": "#30302f",
+                        "surface-container": "#efedeb",
+                        "ink-subtle": "#666666",
+                        "surface-dim": "#dbdad8",
+                        "error-container": "#ffdad6",
+                        "on-background": "#1b1c1b",
+                        "surface-variant": "#e4e2e0",
+                        "on-surface": "#1b1c1b",
+                        "on-secondary-fixed-variant": "#4c463e",
+                        "surface-alt": "#EEECE7",
+                        "tertiary-container": "#1b1b1b",
+                        "surface-container-highest": "#e4e2e0",
+                        "on-secondary-container": "#6b635b",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#474747",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#e2e2e2",
+                        "tertiary": "#000000",
+                        "surface-tint": "#5e5e5e",
+                        "surface-container-low": "#f5f3f1",
+                        "secondary-fixed": "#ece1d6",
+                        "on-secondary-fixed": "#201b14",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#655d55",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fbf9f7",
+                        "on-primary": "#ffffff",
+                        "background": "#fbf9f7",
+                        "outline-variant": "#cfc4c5",
+                        "primary-container": "#1b1b1b",
+                        "on-primary-fixed": "#1b1b1b",
+                        "inverse-on-surface": "#f2f0ee",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "tertiary-fixed-dim": "#c6c6c6",
+                        "on-primary-container": "#848484",
+                        "inverse-primary": "#c6c6c6",
+                        "primary": "#000000",
+                        "surface": "#fbf9f7",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#cfc5bb",
+                        "on-tertiary-container": "#848484",
+                        "on-tertiary-fixed": "#1b1b1b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "section-gap": "128px",
+                        "margin-edge": "64px",
+                        "margin-edge-mobile": "24px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Epilogue"],
+                        "label-caps": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Epilogue"],
+                        "display-xl": ["Epilogue"],
+                        "display-xl-mobile": ["Epilogue"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Epilogue"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "display-xl": ["80px", {"lineHeight": "88px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "display-xl-mobile": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["32px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #fbf9f7;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom smooth scrolling and micro-interactions */
+        html { scroll-behavior: smooth; }
+        .hover-invert:hover { filter: invert(1); }
+        .border-subtle { border-color: rgba(0, 0, 0, 0.1); }
+        .vertical-rule { width: 1px; background-color: rgba(0, 0, 0, 0.1); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-background min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 md:px-margin-edge h-16 bg-background border-b border-primary/10">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:opacity-70 transition-opacity">menu</span>
+<span class="font-headline-md text-headline-md tracking-tighter font-bold text-primary">CLEANTRACKING</span>
+</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-label-caps text-label-caps text-primary tracking-widest hover:opacity-70 transition-opacity" href="#">WORK</a>
+<a class="font-label-caps text-label-caps text-primary tracking-widest hover:opacity-70 transition-opacity" href="#">ABOUT</a>
+<a class="font-label-caps text-label-caps text-primary tracking-widest hover:opacity-70 transition-opacity" href="#">SERVICES</a>
+<a class="font-label-caps text-label-caps text-primary tracking-widest hover:opacity-70 transition-opacity" href="#">CAREERS</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:opacity-70 transition-opacity">account_circle</span>
+<button class="hidden md:block border border-primary px-6 py-2 font-label-caps text-label-caps hover:bg-primary hover:text-white transition-all active:scale-95">CONTACT</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 md:px-margin-edge max-w-[1440px] mx-auto">
+<!-- Hero Section: HELLO -->
+<section class="mt-16 md:mt-32 mb-section-gap grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<div class="md:col-span-8">
+<h1 class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl tracking-tighter leading-none mb-4">
+                    HELLO,<br/>JONATHAN.
+                </h1>
+<div class="h-1 w-24 bg-primary mb-8"></div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                    Welcome back to your space. Your environment is currently at 94% purity level. Maintaining the standard since 2024.
+                </p>
+</div>
+<div class="hidden md:flex md:col-span-4 flex-col justify-end items-end">
+<p class="font-label-caps text-label-caps text-primary border-b border-primary pb-2 mb-4">DASHBOARD / CORE</p>
+<p class="font-body-md text-body-md text-right text-ink-subtle italic">“Move fast, build to last.”</p>
+</div>
+</section>
+<!-- Main Content: Bento Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap- gutter mb-section-gap">
+<!-- Next Clean Section -->
+<div class="md:col-span-7 border-t border-primary/20 pt-8 group cursor-default">
+<p class="font-label-caps text-label-caps text-ink-subtle mb-12">NEXT SCHEDULED SERVICE</p>
+<div class="flex flex-col gap-2">
+<span class="font-display-xl-mobile md:font-headline-lg text-display-xl-mobile md:text-headline-lg text-primary">TUESDAY</span>
+<span class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-primary font-bold">14 JUNE</span>
+</div>
+<div class="mt-12 flex items-center justify-between border-b border-primary/10 pb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined">schedule</span>
+<span class="font-body-md text-body-md">08:00 AM — FULL DEEP CLEAN</span>
+</div>
+<span class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
+</div>
+</div>
+<!-- Spacer for Editorial Layout -->
+<div class="hidden md:block md:col-span-1"></div>
+<!-- Weekly Stats Section -->
+<div class="md:col-span-4 border-t border-primary/20 pt-8">
+<p class="font-label-caps text-label-caps text-ink-subtle mb-12">WEEKLY STATS</p>
+<div class="space-y-12">
+<div class="flex justify-between items-end">
+<div>
+<p class="font-headline-md text-headline-md font-bold">24.5</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">HOURS SAVED</p>
+</div>
+<div class="w-1/2 h-4 bg-surface-variant relative overflow-hidden">
+<div class="absolute inset-0 bg-primary w-[75%] transition-all duration-1000 ease-out"></div>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<p class="font-headline-md text-headline-md font-bold">0.02</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">PARTICULATE RATE</p>
+</div>
+<div class="w-1/2 h-4 bg-surface-variant relative overflow-hidden">
+<div class="absolute inset-0 bg-primary w-[15%] transition-all duration-1000 ease-out"></div>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<p class="font-headline-md text-headline-md font-bold">99.9%</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">SATISFACTION</p>
+</div>
+<div class="w-1/2 h-4 bg-surface-variant relative overflow-hidden">
+<div class="absolute inset-0 bg-primary w-[99%] transition-all duration-1000 ease-out"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Featured Visual Area -->
+<section class="mb-section-gap">
+<div class="relative w-full aspect-[21/9] bg-primary overflow-hidden group">
+<img alt="Minimalist Architecture" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700 grayscale" data-alt="A striking high-contrast architectural photograph of a minimalist modern home interior. The scene features clean lines, sharp shadows, and a monochromatic color palette of charcoal and off-white. Large floor-to-ceiling windows allow soft natural light to fill the room, highlighting the textures of raw concrete and polished steel. The atmosphere is sophisticated, quiet, and exudes professional authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa8u4Vq9EfmBQHp6mcjgSZw33K1vtaettzl6vpOCs7G06NQy6ZQkoFHHf9Zjne7hGPGmiO_AccIvfEAX5PZuXpdH_hB4u46EsvpSsqrrEOwObMTdOrpz1x5U3ukvMaCJwj7_AIe2cTv3bxyR5HxZMBnd9rPuDQWMyxwjhdBAURMxnRNWArrwKyHMFK-Cth29Yn_2fidPFxYOUeSw2dZxy5w4gdYkSTDoj327a_7oITTB4VrXR-qsCQq-06ZUNd2qnrbSlAS2feRBE"/>
+<div class="absolute bottom-0 left-0 p-8 md:p-12 text-white bg-gradient-to-t from-black/80 to-transparent w-full">
+<p class="font-label-caps text-label-caps tracking-[0.2em] mb-4">CURRENT PROJECT STATUS</p>
+<h2 class="font-headline-lg text-headline-lg max-w-2xl">Refining the definition of domestic precision. Every surface, every detail.</h2>
+</div>
+</div>
+</section>
+<!-- Services Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter border-t border-primary/10 pt-16">
+<div class="flex flex-col gap-6">
+<span class="material-symbols-outlined text-4xl">sanitizer</span>
+<h3 class="font-headline-md text-headline-md">Deep Sanitization</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Medical-grade cleaning protocols for the highest standard of residential hygiene.</p>
+<a class="font-label-caps text-label-caps border-b border-primary w-fit pb-1 hover:opacity-50 transition-opacity" href="#">EXPLORE SERVICE</a>
+</div>
+<div class="flex flex-col gap-6">
+<span class="material-symbols-outlined text-4xl">air_purifier_gen</span>
+<h3 class="font-headline-md text-headline-md">Air Purity Tracking</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Real-time monitoring of indoor air quality and ventilation efficiency in all zones.</p>
+<a class="font-label-caps text-label-caps border-b border-primary w-fit pb-1 hover:opacity-50 transition-opacity" href="#">VIEW DATA</a>
+</div>
+<div class="flex flex-col gap-6">
+<span class="material-symbols-outlined text-4xl">auto_delete</span>
+<h3 class="font-headline-md text-headline-md">Smart Maintenance</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Autonomous scheduling based on occupancy patterns and environmental sensors.</p>
+<a class="font-label-caps text-label-caps border-b border-primary w-fit pb-1 hover:opacity-50 transition-opacity" href="#">CONFIGURE</a>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-background border-t border-primary/20">
+<a class="flex flex-col items-center justify-center text-primary font-bold border-t-2 border-primary -mt-px pt-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-ink-subtle pt-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-sm text-label-sm">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center text-ink-subtle pt-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">cleaning_services</span>
+<span class="font-label-sm text-label-sm">Services</span>
+</a>
+</nav>
+<!-- Floating Action Button -->
+<div class="fixed bottom-24 right-6 md:bottom-12 md:right-12 z-40">
+<button class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-none border-2 border-primary active:bg-white active:text-primary group">
+<span class="material-symbols-outlined text-3xl group-active:text-primary">add</span>
+</button>
+</div>
+<!-- Footer for Desktop -->
+<footer class="hidden md:block py-16 px-margin-edge bg-surface-alt border-t border-primary/10">
+<div class="max-w-[1440px] mx-auto flex justify-between items-start">
+<div>
+<span class="font-headline-md text-headline-md tracking-tighter font-bold text-primary">CLEANTRACKING</span>
+<p class="mt-4 font-body-md text-ink-subtle max-w-xs">The editorial standard for personal environment management. Precision at scale.</p>
+</div>
+<div class="grid grid-cols-2 gap-16">
+<div class="flex flex-col gap-2">
+<p class="font-label-caps text-label-caps text-primary mb-4">PLATFORM</p>
+<a class="font-body-md hover:underline" href="#">Support</a>
+<a class="font-body-md hover:underline" href="#">API</a>
+<a class="font-body-md hover:underline" href="#">Privacy</a>
+</div>
+<div class="flex flex-col gap-2">
+<p class="font-label-caps text-label-caps text-primary mb-4">FOLLOW</p>
+<a class="font-body-md hover:underline" href="#">Instagram</a>
+<a class="font-body-md hover:underline" href="#">LinkedIn</a>
+<a class="font-body-md hover:underline" href="#">Twitter</a>
+</div>
+</div>
+</div>
+<div class="max-w-[1440px] mx-auto mt-16 pt-8 border-t border-primary/5 flex justify-between">
+<p class="font-label-sm text-label-sm text-ink-subtle">© 2024 CLEANTRACKING SOLUTIONS</p>
+<p class="font-label-sm text-label-sm text-ink-subtle">DESIGNED BY REF</p>
+</div>
+</footer>
+<script>
+        // Micro-interactions and simple effects
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animate progress bars on scroll or load
+            const bars = document.querySelectorAll('.bg-primary.w-\\[');
+            bars.forEach(bar => {
+                const width = bar.classList.value.match(/w-\[(\d+)%\]/)[1];
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.transition = 'width 1.5s cubic-bezier(0.19, 1, 0.22, 1)';
+                    bar.style.width = width + '%';
+                }, 300);
+            });
+
+            // Smooth header hide/show logic
+            let lastScroll = 0;
+            const header = document.querySelector('header');
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.pageYOffset;
+                if (currentScroll > lastScroll && currentScroll > 100) {
+                    header.style.transform = 'translateY(-100%)';
+                } else {
+                    header.style.transform = 'translateY(0)';
+                }
+                header.style.transition = 'transform 0.4s ease';
+                lastScroll = currentScroll;
+            });
+        });
+    </script>
+</body></html>
