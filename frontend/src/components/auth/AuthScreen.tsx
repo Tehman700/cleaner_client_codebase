@@ -62,6 +62,7 @@ export default function AuthScreen({ onLogin }: Props) {
     <div id="auth-screen">
       <div className="auth-logo" />
       <div className="auth-title">CleanTracking</div>
+      <div className="auth-title-rule" />
       <div className="auth-subtitle">Window Cleaning Management</div>
 
       <div className="auth-card">

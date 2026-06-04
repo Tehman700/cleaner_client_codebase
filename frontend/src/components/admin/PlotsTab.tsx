@@ -37,7 +37,7 @@ export default function PlotsTab() {
 
       {!filtered.length ? (
         <div className="empty-state">
-          <div className="empty-icon">🏘️</div>
+          <div className="empty-icon"><span className="material-symbols-outlined" style={{ fontSize: 40 }}>home_work</span></div>
           <div className="empty-title">{plots.length ? 'No results' : 'No plots yet'}</div>
           <div className="empty-sub">{plots.length ? 'Try a different search' : 'Add your first plot to get started'}</div>
         </div>

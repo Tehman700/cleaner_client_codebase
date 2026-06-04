@@ -5,6 +5,7 @@ import AuthScreen    from './components/auth/AuthScreen';
 import AdminScreen   from './components/admin/AdminScreen';
 import CleanerScreen from './components/cleaner/CleanerScreen';
 import LoadingOverlay from './components/LoadingOverlay';
+import CursorEffect from './components/CursorEffect';
 import type { Role } from './types';
 
 type Screen = 'auth' | 'admin' | 'cleaner';
@@ -36,6 +37,7 @@ function AppContent() {
 export default function App() {
   return (
     <AppProvider>
+      <CursorEffect />
       <AppContent />
     </AppProvider>
   );

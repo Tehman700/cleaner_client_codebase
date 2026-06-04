@@ -45,7 +45,7 @@ export default function OverviewTab() {
 
       {!scheduled.length ? (
         <div className="empty-state">
-          <div className="empty-icon">📋</div>
+          <div className="empty-icon"><span className="material-symbols-outlined" style={{ fontSize: 40 }}>assignment</span></div>
           <div className="empty-title">No jobs scheduled</div>
           <div className="empty-sub">Add jobs in the Schedule tab</div>
         </div>
@@ -74,7 +74,7 @@ export default function OverviewTab() {
                 <div className="progress-fill" style={{ width: `${pct}%` }} />
               </div>
               {job?.photo && (
-                <div style={{ marginTop: 12, fontSize: 13, color: 'var(--success)' }}>📄 Document uploaded</div>
+                <div style={{ marginTop: 12, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>description</span> Document uploaded</div>
               )}
             </div>
           );

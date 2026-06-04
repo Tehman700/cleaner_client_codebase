@@ -77,7 +77,7 @@ export default function JobCard({ day, plot }: Props) {
             {allDone && (
               <>
                 <hr className="divider" />
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>📄 Upload Signed Document</div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 7 }}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>description</span> Upload Signed Document</div>
                 <div
                   className={`upload-zone${job.photo ? ' has-photo' : ''}`}
                   onClick={() => fileRef.current?.click()}
@@ -98,13 +98,13 @@ export default function JobCard({ day, plot }: Props) {
                         alt="Uploaded document"
                         onClick={e => { e.stopPropagation(); setLightbox({ src: job.photo!, label: `${plot.name} — signed document` }); }}
                       />
-                      <div style={{ marginTop: 8, fontSize: 13, color: 'var(--success)', fontWeight: 500 }}>
-                        ✓ Document uploaded · tap to replace
+                      <div style={{ marginTop: 8, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                        Document uploaded · tap to replace
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="upload-icon">📷</div>
+                      <div className="upload-icon"><span className="material-symbols-outlined" style={{ fontSize: 28 }}>photo_camera</span></div>
                       <div className="upload-text">
                         <strong>Tap to take photo or upload</strong>
                         Photo of the site manager's signed document
@@ -112,7 +112,7 @@ export default function JobCard({ day, plot }: Props) {
                     </>
                   )}
                 </div>
-                {job.photo && <div className="completed-banner">✅ Plot fully signed off</div>}
+                {job.photo && <div className="completed-banner"><span className="material-symbols-outlined" style={{ fontSize: 15 }}>check_circle</span> Plot fully signed off</div>}
               </>
             )}
           </div>

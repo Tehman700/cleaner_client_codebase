@@ -20,10 +20,10 @@ export default function AdminScreen({ onLogout }: { onLogout: () => void }) {
     <div className="app-screen">
       <div className="topbar">
         <div className="topbar-left">
-          <span className="topbar-logo">🧹</span>
+          <span className="material-symbols-outlined topbar-menu-icon">menu</span>
           <div>
             <h1>CleanTracking</h1>
-            <div className="topbar-sub">Admin Dashboard</div>
+            <div className="topbar-sub">Admin</div>
           </div>
         </div>
         <div className="topbar-actions">

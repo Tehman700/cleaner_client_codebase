@@ -27,7 +27,7 @@ export default function DocumentsTab() {
 
       {!withPhotos.length ? (
         <div className="empty-state">
-          <div className="empty-icon">📄</div>
+          <div className="empty-icon"><span className="material-symbols-outlined" style={{ fontSize: 40 }}>description</span></div>
           <div className="empty-title">No documents uploaded</div>
           <div className="empty-sub">Documents appear here once the cleaner uploads them</div>
         </div>
