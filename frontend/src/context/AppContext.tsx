@@ -114,7 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const updated = await api.updateJob(day, plotId, { tasks: newTasks });
       setJobs(prev => ({ ...prev, [key]: normaliseJob(updated) }));
-      trackEvent('task_completed', 'cleaner', { day, plot_id: plotId, task_index: taskIdx, checked: newTasks[taskIdx] });
+      trackEvent('task_completed', 'cleaner', { day, plot_id: plotId, task_index: taskIdx, checked: newTasks[String(taskIdx)] });
     } catch {
       setJobs(prev => ({ ...prev, [key]: current }));
       throw new Error('Failed to save task');
