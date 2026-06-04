@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../../api/client';
 import type { Role } from '../../types';
 
@@ -9,10 +9,10 @@ interface Props {
 const DIGITS = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
 
 export default function AuthScreen({ onLogin }: Props) {
-  const [role,   setRole]   = useState<Role>('cleaner');
-  const [pin,    setPin]    = useState('');
-  const [error,  setError]  = useState('');
-  const [busy,   setBusy]   = useState(false);
+  const [role,  setRole]  = useState<Role>('cleaner');
+  const [pin,   setPin]   = useState('');
+  const [error, setError] = useState('');
+  const [busy,  setBusy]  = useState(false);
 
   const handleRoleChange = (r: Role) => {
     setRole(r); setPin(''); setError('');
@@ -44,6 +44,20 @@ export default function AuthScreen({ onLogin }: Props) {
       setBusy(false);
     }
   };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (busy) return;
+      if (e.key >= '0' && e.key <= '9') {
+        handleDigit(e.key);
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        handleDigit('⌫');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin, busy]);
 
   return (
     <div id="auth-screen">
