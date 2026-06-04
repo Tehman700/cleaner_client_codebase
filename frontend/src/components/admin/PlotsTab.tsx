@@ -31,7 +31,7 @@ export default function PlotsTab() {
       </div>
 
       <div className="search-bar">
-        <span className="search-icon">🔍</span>
+        <span className="material-symbols-outlined search-icon">search</span>
         <input placeholder="Search plots…" value={query} onChange={e => setQuery(e.target.value)} />
       </div>
 

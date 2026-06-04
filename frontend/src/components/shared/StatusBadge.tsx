@@ -3,7 +3,7 @@ type Status = 'pending' | 'progress' | 'done';
 const MAP: Record<Status, [string, string]> = {
   pending:  ['badge-pending',  'Pending'],
   progress: ['badge-progress', 'In Progress'],
-  done:     ['badge-done',     '✓ Complete'],
+  done:     ['badge-done',     '✓ Done'],
 };
 
 export default function StatusBadge({ status }: { status: Status }) {

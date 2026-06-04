@@ -36,11 +36,11 @@ export default function AuthScreen({ onLogin }: Props) {
         trackEvent('login', role);
         await onLogin(role);
       } else {
-        setError('Incorrect PIN. Try again.');
+        setError('Incorrect PIN — try again');
         setPin('');
       }
     } catch {
-      setError('Cannot reach server. Check your connection.');
+      setError('Server unreachable — check connection');
       setPin('');
     } finally {
       setBusy(false);
@@ -50,11 +50,8 @@ export default function AuthScreen({ onLogin }: Props) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (busy) return;
-      if (e.key >= '0' && e.key <= '9') {
-        handleDigit(e.key);
-      } else if (e.key === 'Backspace' || e.key === 'Delete') {
-        handleDigit('⌫');
-      }
+      if (e.key >= '0' && e.key <= '9') handleDigit(e.key);
+      else if (e.key === 'Backspace' || e.key === 'Delete') handleDigit('⌫');
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -63,21 +60,27 @@ export default function AuthScreen({ onLogin }: Props) {
 
   return (
     <div id="auth-screen">
-      <div className="auth-logo">🧹</div>
+      <div className="auth-logo" />
       <div className="auth-title">CleanTracking</div>
-      <div className="auth-subtitle">Window cleaning job management</div>
+      <div className="auth-subtitle">Window Cleaning Management</div>
 
       <div className="auth-card">
         <div className="role-tabs">
-          <button className={`role-tab${role === 'cleaner' ? ' active' : ''}`} onClick={() => handleRoleChange('cleaner')}>
-            👷 Cleaner
+          <button
+            className={`role-tab${role === 'cleaner' ? ' active' : ''}`}
+            onClick={() => handleRoleChange('cleaner')}
+          >
+            Cleaner
           </button>
-          <button className={`role-tab${role === 'admin' ? ' active' : ''}`} onClick={() => handleRoleChange('admin')}>
-            ⚙️ Admin
+          <button
+            className={`role-tab${role === 'admin' ? ' active' : ''}`}
+            onClick={() => handleRoleChange('admin')}
+          >
+            Admin
           </button>
         </div>
 
-        <h2>{role === 'admin' ? 'Admin PIN' : 'Enter your PIN'}</h2>
+        <h2>{role === 'admin' ? 'Admin Access' : 'Enter PIN'}</h2>
 
         <div className="pin-display">
           {[0,1,2,3].map(i => (

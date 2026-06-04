@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import OverviewTab   from './OverviewTab';
-import ScheduleTab   from './ScheduleTab';
-import PlotsTab      from './PlotsTab';
-import DocumentsTab  from './DocumentsTab';
+import OverviewTab  from './OverviewTab';
+import ScheduleTab  from './ScheduleTab';
+import PlotsTab     from './PlotsTab';
+import DocumentsTab from './DocumentsTab';
 
 type Tab = 'overview' | 'schedule' | 'plots' | 'documents';
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'overview',   label: '📊 Overview' },
-  { id: 'schedule',   label: '📅 Schedule' },
-  { id: 'plots',      label: '🏘️ Plots'    },
-  { id: 'documents',  label: '📄 Documents' },
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: 'overview',  label: 'Overview',  icon: 'grid_view' },
+  { id: 'schedule',  label: 'Schedule',  icon: 'calendar_month' },
+  { id: 'plots',     label: 'Plots',     icon: 'home_work' },
+  { id: 'documents', label: 'Documents', icon: 'description' },
 ];
 
 export default function AdminScreen({ onLogout }: { onLogout: () => void }) {
@@ -20,10 +20,10 @@ export default function AdminScreen({ onLogout }: { onLogout: () => void }) {
     <div className="app-screen">
       <div className="topbar">
         <div className="topbar-left">
-          <span className="topbar-logo">🧹</span>
+          <span className="material-symbols-outlined topbar-menu-icon">menu</span>
           <div>
-            <h1>CleanTrack</h1>
-            <div className="topbar-sub">Admin Dashboard</div>
+            <h1>CleanTracking</h1>
+            <div className="topbar-sub">Admin</div>
           </div>
         </div>
         <div className="topbar-actions">
@@ -38,6 +38,7 @@ export default function AdminScreen({ onLogout }: { onLogout: () => void }) {
             className={`tab-btn${tab === t.id ? ' active' : ''}`}
             onClick={() => setTab(t.id)}
           >
+            <span className="material-symbols-outlined">{t.icon}</span>
             {t.label}
           </button>
         ))}
