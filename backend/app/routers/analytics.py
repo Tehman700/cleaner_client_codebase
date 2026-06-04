@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from collections import defaultdict
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -9,6 +9,12 @@ from app.database import get_db
 from app.models import AnalyticsEvent
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
+
+
+def _check_token(token: str = Query(..., description="Auth token from /tracking/login")):
+    from app.routers.tracking import verify_token
+    if not verify_token(token):
+        raise HTTPException(status_code=403, detail="Invalid or missing token")
 
 
 class EventIn(BaseModel):
@@ -26,13 +32,13 @@ def log_event(body: EventIn, db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@router.get("/summary")
+@router.get("/summary", dependencies=[Depends(_check_token)])
 def get_summary(db: Session = Depends(get_db)):
     all_events = db.query(AnalyticsEvent).order_by(AnalyticsEvent.created_at.desc()).all()
 
     by_type: dict[str, int] = defaultdict(int)
     by_role: dict[str, int] = defaultdict(int)
-    daily: dict[str, int] = defaultdict(int)
+    daily:   dict[str, int] = defaultdict(int)
 
     for ev in all_events:
         by_type[ev.event_type] += 1
@@ -41,14 +47,12 @@ def get_summary(db: Session = Depends(get_db)):
         day_str = ev.created_at.strftime("%Y-%m-%d") if ev.created_at else "unknown"
         daily[day_str] += 1
 
-    # Last 30 days for the chart
     today = datetime.utcnow().date()
     daily_chart = []
     for i in range(29, -1, -1):
         d = (today - timedelta(days=i)).isoformat()
         daily_chart.append({"date": d, "count": daily.get(d, 0)})
 
-    # Recent 50 events
     recent = [
         {
             "id":         ev.id,

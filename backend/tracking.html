@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanTracking - Analytics</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; color: #1e293b; min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    padding: 24px;
+  }
+  .login-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .login-logo { font-size: 40px; text-align: center; margin-bottom: 10px; }
+  .login-title { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .login-sub { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 28px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+  .form-input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: 15px; color: #1e293b; background: #fff;
+    outline: none; font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: #2563eb; }
+  .login-btn {
+    width: 100%; padding: 12px;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer; margin-top: 8px;
+    transition: background 0.2s;
+  }
+  .login-btn:hover { background: #1d4ed8; }
+  .login-btn:disabled { background: #93c5fd; cursor: not-allowed; }
+  .login-error { color: #dc2626; font-size: 13px; text-align: center; margin-top: 12px; min-height: 18px; }
+
+  /* DASHBOARD */
+  #dashboard-screen { display: none; }
+
+  .topbar {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #fff; padding: 16px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .topbar h1 { font-size: 18px; font-weight: 700; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .topbar-sub { font-size: 12px; color: #bfdbfe; }
+  .logout-btn {
+    background: transparent; color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 7px; padding: 6px 14px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.1); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 18px; }
+  .stat-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .stat-num { font-size: 36px; font-weight: 700; color: #2563eb; }
+  .stat-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+
+  .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; margin-bottom: 24px; }
+  .section-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 18px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 280px; gap: 20px; margin-bottom: 24px; }
+
+  /* Bar chart */
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 130px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; background: #2563eb; border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.4s ease; cursor: default; }
+  .bar:hover { background: #1d4ed8; }
+  .bar-label { font-size: 9px; color: #94a3b8; transform: rotate(-45deg); white-space: nowrap; }
+
+  /* Role cards */
+  .role-row { display: flex; gap: 12px; height: 100%; }
+  .role-card { flex: 1; border-radius: 10px; padding: 20px 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+  .role-card.admin   { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .role-card.cleaner { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .role-num   { font-size: 36px; font-weight: 700; }
+  .role-card.admin   .role-num { color: #2563eb; }
+  .role-card.cleaner .role-num { color: #16a34a; }
+  .role-name  { font-size: 13px; font-weight: 600; color: #64748b; margin-top: 6px; }
+
+  /* Event breakdown */
+  .event-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f1f5f9; }
+  .event-row:last-child { border-bottom: none; }
+  .event-name { font-size: 13px; font-weight: 500; width: 180px; flex-shrink: 0; }
+  .bar-bg { flex: 1; background: #f1f5f9; border-radius: 4px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #2563eb; border-radius: 4px; transition: width 0.4s; }
+  .event-count { font-size: 13px; font-weight: 700; color: #2563eb; width: 36px; text-align: right; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #f1f5f9; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f8fafc; }
+  tr:hover td { background: #f8fafc; }
+
+  .badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge.login            { background: #dbeafe; color: #1e40af; }
+  .badge.task_completed   { background: #dcfce7; color: #166534; }
+  .badge.photo_uploaded   { background: #fef9c3; color: #854d0e; }
+  .badge.plot_created     { background: #ede9fe; color: #5b21b6; }
+  .badge.plot_updated     { background: #e0f2fe; color: #075985; }
+  .badge.plot_deleted     { background: #fee2e2; color: #991b1b; }
+  .badge.schedule_added   { background: #d1fae5; color: #065f46; }
+  .badge.schedule_removed { background: #fce7f3; color: #9d174d; }
+
+  .role-pill { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .role-pill.admin   { background: #eff6ff; color: #2563eb; }
+  .role-pill.cleaner { background: #f0fdf4; color: #16a34a; }
+
+  .muted { color: #94a3b8; }
+  .mono  { font-family: monospace; font-size: 12px; color: #64748b; }
+
+  .empty { text-align: center; padding: 40px; color: #94a3b8; font-size: 14px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 18px; height: 18px; border: 3px solid #dbeafe; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">📊</div>
+    <div class="login-title">Analytics</div>
+    <div class="login-sub">CleanTracking — restricted access</div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" id="inp-user" type="text" placeholder="Enter username" autocomplete="username" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="inp-pass" type="password" placeholder="Enter password" autocomplete="current-password" />
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard-screen">
+  <div class="topbar">
+    <h1>CleanTracking — Analytics</h1>
+    <div class="topbar-right">
+      <span class="topbar-sub" id="updated-at"></span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="loading-msg" style="color:#2563eb; margin-bottom:20px; display:none;">
+      <span class="spinner"></span>Loading…
+    </div>
+
+    <div id="dash-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Events</div>
+          <div class="stat-num" id="s-total">—</div>
+          <div class="stat-sub">all time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Logins</div>
+          <div class="stat-num" id="s-logins">—</div>
+          <div class="stat-sub">admin + cleaner</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tasks Completed</div>
+          <div class="stat-num" id="s-tasks">—</div>
+          <div class="stat-sub">check-offs recorded</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Photos Uploaded</div>
+          <div class="stat-num" id="s-photos">—</div>
+          <div class="stat-sub">signed documents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Plots Created</div>
+          <div class="stat-num" id="s-plots">—</div>
+          <div class="stat-sub">by admin</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="section">
+          <div class="section-title">Daily Activity — last 30 days</div>
+          <div class="chart" id="chart"></div>
+        </div>
+        <div class="section">
+          <div class="section-title">Logins by Role</div>
+          <div class="role-row" id="role-split"></div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-bottom:24px;">
+        <div class="section-title">Event Breakdown</div>
+        <div id="event-breakdown"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Recent Activity — last 50 events</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Role</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="events-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let _token = sessionStorage.getItem('ct_token') || '';
+
+  // Auto-restore session
+  if (_token) showDashboard();
+
+  // Allow Enter key on login form
+  ['inp-user','inp-pass'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+
+  async function doLogin() {
+    const user = document.getElementById('inp-user').value.trim();
+    const pass = document.getElementById('inp-pass').value;
+    const errEl = document.getElementById('login-error');
+    const btn   = document.getElementById('login-btn');
+
+    if (!user || !pass) { errEl.textContent = 'Please enter username and password.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    errEl.textContent = '';
+
+    try {
+      const res = await fetch('/tracking/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, password: pass }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        errEl.textContent = err.detail || 'Invalid username or password.';
+        return;
+      }
+      const data = await res.json();
+      _token = data.token;
+      sessionStorage.setItem('ct_token', _token);
+      showDashboard();
+    } catch {
+      errEl.textContent = 'Connection error. Try again.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  }
+
+  function doLogout() {
+    _token = '';
+    sessionStorage.removeItem('ct_token');
+    document.getElementById('dashboard-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display    = 'flex';
+    document.getElementById('inp-pass').value = '';
+    document.getElementById('login-error').textContent = '';
+  }
+
+  function showDashboard() {
+    document.getElementById('login-screen').style.display    = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+    loadData();
+  }
+
+  async function loadData() {
+    document.getElementById('loading-msg').style.display = 'block';
+    try {
+      const res = await fetch(`/analytics/summary?token=${_token}`);
+      if (res.status === 403) {
+        doLogout(); return;
+      }
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      render(data);
+      document.getElementById('updated-at').textContent =
+        'Updated: ' + new Date().toLocaleTimeString('en-GB');
+    } catch (e) {
+      alert('Failed to load analytics: ' + e.message);
+    } finally {
+      document.getElementById('loading-msg').style.display = 'none';
+    }
+  }
+
+  function fmt(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso.endsWith('Z') ? iso : iso + 'Z');
+    return d.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+
+  function fmtMeta(meta) {
+    if (!meta || !Object.keys(meta).length) return '—';
+    return Object.entries(meta).map(([k,v]) => `${k}: ${v}`).join(' | ');
+  }
+
+  function render(data) {
+    const by = data.by_type || {};
+
+    document.getElementById('s-total').textContent  = data.total  || 0;
+    document.getElementById('s-logins').textContent = by.login    || 0;
+    document.getElementById('s-tasks').textContent  = by.task_completed || 0;
+    document.getElementById('s-photos').textContent = by.photo_uploaded || 0;
+    document.getElementById('s-plots').textContent  = by.plot_created   || 0;
+
+    // Chart
+    const chart  = document.getElementById('chart');
+    const counts = (data.daily_chart || []).map(d => d.count);
+    const max    = Math.max(...counts, 1);
+    chart.innerHTML = (data.daily_chart || []).map(d => `
+      <div class="bar-wrap" title="${d.date}: ${d.count} events">
+        <div class="bar" style="height:${Math.max(Math.round(d.count/max*100), d.count>0?4:0)}%"></div>
+        <div class="bar-label">${d.date.slice(5)}</div>
+      </div>`).join('');
+
+    // Role split
+    const roles = data.by_role || {};
+    document.getElementById('role-split').innerHTML = `
+      <div class="role-card admin">
+        <div class="role-num">${roles.admin || 0}</div>
+        <div class="role-name">Admin logins</div>
+      </div>
+      <div class="role-card cleaner">
+        <div class="role-num">${roles.cleaner || 0}</div>
+        <div class="role-name">Cleaner logins</div>
+      </div>`;
+
+    // Event breakdown
+    const sorted = Object.entries(by).sort((a,b) => b[1]-a[1]);
+    const maxCount = Math.max(...Object.values(by), 1);
+    document.getElementById('event-breakdown').innerHTML =
+      sorted.length ? sorted.map(([type, count]) => `
+        <div class="event-row">
+          <div class="event-name">${type.replace(/_/g,' ')}</div>
+          <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(count/maxCount*100)}%"></div></div>
+          <div class="event-count">${count}</div>
+        </div>`).join('')
+      : '<div class="empty">No events recorded yet</div>';
+
+    // Recent events
+    const tbody = document.getElementById('events-body');
+    tbody.innerHTML = (data.recent || []).length
+      ? data.recent.map(ev => `
+          <tr>
+            <td class="muted">${fmt(ev.created_at)}</td>
+            <td><span class="badge ${ev.event_type}">${ev.event_type.replace(/_/g,' ')}</span></td>
+            <td>${ev.role ? `<span class="role-pill ${ev.role}">${ev.role}</span>` : '<span class="muted">—</span>'}</td>
+            <td class="mono">${fmtMeta(ev.metadata)}</td>
+          </tr>`).join('')
+      : '<tr><td colspan="4" class="empty">No events recorded yet</td></tr>';
+  }
+</script>
+</body>
+</html>
