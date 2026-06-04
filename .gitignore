@@ -1,0 +1,34 @@
+# ── OS / Editor ──────────────────────────────────────────────
+desktop.ini
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.idea/
+.vscode/
+
+# ── Client source files (reference only, not part of the app) ─
+client_codebase.rtf
+client_codebase.txt
+
+# ── Backend ───────────────────────────────────────────────────
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/.env
+backend/cleantrack.db
+backend/build/
+backend/dist/
+backend/*.egg-info/
+
+# ── Frontend ──────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/.env
+frontend/.env.local
+frontend/*.local

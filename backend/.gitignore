@@ -1,0 +1,32 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.pyo
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets — never commit
+.env
+
+# Database
+cleantrack.db
+*.db
+*.sqlite3
+
+# UV
+.uv/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
