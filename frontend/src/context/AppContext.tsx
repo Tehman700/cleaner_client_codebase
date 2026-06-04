@@ -106,17 +106,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleTask = useCallback(async (day: string, plotId: string, taskIdx: number) => {
-    const key      = jobKey(day, plotId);
-    const current  = jobs[key] ?? { tasks: {}, photo: null, photoName: null };
-    const newTasks = { ...current.tasks, [taskIdx]: !current.tasks[taskIdx] };
+    const jobK     = jobKey(day, plotId);
+    const taskKey  = String(taskIdx);
+    const current  = jobs[jobK] ?? { tasks: {}, photo: null, photoName: null };
+    const newTasks: Record<string, boolean> = { ...current.tasks, [taskKey]: !current.tasks[taskKey] };
 
-    setJobs(prev => ({ ...prev, [key]: { ...current, tasks: newTasks } }));
+    setJobs(prev => ({ ...prev, [jobK]: { ...current, tasks: newTasks } }));
     try {
       const updated = await api.updateJob(day, plotId, { tasks: newTasks });
-      setJobs(prev => ({ ...prev, [key]: normaliseJob(updated) }));
-      trackEvent('task_completed', 'cleaner', { day, plot_id: plotId, task_index: taskIdx, checked: newTasks[String(taskIdx)] });
+      setJobs(prev => ({ ...prev, [jobK]: normaliseJob(updated) }));
+      trackEvent('task_completed', 'cleaner', { day, plot_id: plotId, task_index: taskIdx, checked: newTasks[taskKey] });
     } catch {
-      setJobs(prev => ({ ...prev, [key]: current }));
+      setJobs(prev => ({ ...prev, [jobK]: current }));
       throw new Error('Failed to save task');
     }
   }, [jobs]);
