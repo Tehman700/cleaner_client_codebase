@@ -13,7 +13,7 @@ export default function CleanerScreen({ onLogout }: { onLogout: () => void }) {
     <div className="app-screen">
       <div className="topbar">
         <div className="topbar-left">
-          <span className="material-symbols-outlined topbar-menu-icon">cleaning_services</span>
+          <span className="topbar-logo">👷</span>
           <div>
             <h1>My Jobs</h1>
             <div className="topbar-sub">{dateLabel}</div>
@@ -27,9 +27,9 @@ export default function CleanerScreen({ onLogout }: { onLogout: () => void }) {
       <div className="content">
         {!scheduled.length ? (
           <div className="empty-state">
-            <div className="empty-icon">—</div>
+            <div className="empty-icon">☀️</div>
             <div className="empty-title">No jobs today</div>
-            <div className="empty-sub">Nothing scheduled — enjoy your day</div>
+            <div className="empty-sub">Nothing scheduled — enjoy your day!</div>
           </div>
         ) : (
           scheduled.map(s => {
