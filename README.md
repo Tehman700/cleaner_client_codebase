@@ -106,10 +106,10 @@ Vite proxies all API requests (`/auth`, `/plots`, `/schedule`, `/jobs`) to `loca
 
 ### Default PINs (local only)
 
-| Role    | PIN  |
-|---------|------|
-| Admin   | 9999 |
-| Cleaner | 1234 |
+| Role    | PIN                        |
+|---------|----------------------------|
+| Admin   | set in `backend/.env`      |
+| Cleaner | set in `backend/.env`      |
 
 Change these in `backend/.env` before deploying.
 
@@ -121,8 +121,8 @@ Change these in `backend/.env` before deploying.
 
 | Variable       | Description                          | Example                          |
 |----------------|--------------------------------------|----------------------------------|
-| `ADMIN_PIN`    | 4-digit PIN for the admin role       | `9999`                           |
-| `CLEANER_PIN`  | 4-digit PIN for the cleaner role     | `1234`                           |
+| `ADMIN_PIN`    | 4-digit PIN for the admin role       | any 4-digit number               |
+| `CLEANER_PIN`  | 4-digit PIN for the cleaner role     | any 4-digit number               |
 | `DATABASE_URL` | SQLAlchemy database connection URL   | `sqlite:///./cleantrack.db`      |
 | `ALLOWED_ORIGINS` | Comma-separated allowed CORS origins (optional, defaults to `*`) | `https://yourapp.netlify.app` |
 
