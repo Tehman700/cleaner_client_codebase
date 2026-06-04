@@ -48,7 +48,7 @@ export default function AuthScreen({ onLogin }: Props) {
   return (
     <div id="auth-screen">
       <div className="auth-logo">🧹</div>
-      <div className="auth-title">CleanTrack</div>
+      <div className="auth-title">CleanTracking</div>
       <div className="auth-subtitle">Window cleaning job management</div>
 
       <div className="auth-card">
