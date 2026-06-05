@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api/client';
 import { trackEvent } from '../../utils/analytics';
 import type { Role } from '../../types';
@@ -15,48 +15,73 @@ export default function AuthScreen({ onLogin }: Props) {
   const [error, setError] = useState('');
   const [busy,  setBusy]  = useState(false);
 
+  // Identifies the latest verify attempt. Bumping it makes any in-flight
+  // request ignore its own result — used to cancel on backspace / role change.
+  const attemptRef = useRef(0);
+
+  const cancelPending = () => {
+    attemptRef.current += 1;
+    setBusy(false);
+  };
+
   const handleRoleChange = (r: Role) => {
+    cancelPending();
     setRole(r); setPin(''); setError('');
   };
 
-  const handleDigit = (d: string) => {
-    if (d === '⌫') { setPin(p => p.slice(0, -1)); setError(''); return; }
-    if (!d || pin.length >= 4) return;
-    const next = pin + d;
-    setPin(next);
-    if (next.length === 4) setTimeout(() => attemptLogin(next), 150);
+  // Add a digit — functional updater, always reads the latest pin (no stale closure)
+  const pressDigit = (d: string) => {
+    if (!d) return;
+    setError('');
+    setPin(p => (p.length >= 4 ? p : p + d));
   };
 
-  const attemptLogin = async (p: string) => {
+  // Backspace works at any time, even mid-verify (cancels the pending attempt)
+  const pressDelete = () => {
+    setError('');
+    cancelPending();
+    setPin(p => p.slice(0, -1));
+  };
+
+  // Auto-submit once 4 digits are entered
+  useEffect(() => {
+    if (pin.length !== 4 || busy) return;
+    const myAttempt = ++attemptRef.current;
     setBusy(true);
     setError('');
-    try {
-      const res = await api.verifyPin(role, p);
-      if (res.success) {
-        trackEvent('login', role);
-        await onLogin(role);
-      } else {
-        setError('Incorrect PIN — try again');
-        setPin('');
-      }
-    } catch {
-      setError('Server unreachable — check connection');
-      setPin('');
-    } finally {
-      setBusy(false);
-    }
-  };
 
+    (async () => {
+      try {
+        const res = await api.verifyPin(role, pin);
+        if (attemptRef.current !== myAttempt) return; // cancelled meanwhile
+        if (res.success) {
+          trackEvent('login', role);
+          await onLogin(role);
+        } else {
+          setError('Incorrect PIN — try again');
+          setPin('');
+        }
+      } catch {
+        if (attemptRef.current !== myAttempt) return;
+        setError('Server unreachable — check connection');
+        setPin('');
+      } finally {
+        if (attemptRef.current === myAttempt) setBusy(false);
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin]);
+
+  // Physical keyboard / numpad support
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (busy) return;
-      if (e.key >= '0' && e.key <= '9') handleDigit(e.key);
-      else if (e.key === 'Backspace' || e.key === 'Delete') handleDigit('⌫');
+      if (e.key >= '0' && e.key <= '9') pressDigit(e.key);
+      else if (e.key === 'Backspace' || e.key === 'Delete') pressDelete();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pin, busy]);
+  }, []);
 
   return (
     <div id="auth-screen">
@@ -94,15 +119,19 @@ export default function AuthScreen({ onLogin }: Props) {
             <button
               key={i}
               className={`pin-btn${d === '⌫' ? ' del' : ''}${d === '' ? ' empty' : ''}`}
-              onClick={() => !busy && handleDigit(d)}
-              disabled={busy}
+              onClick={() => (d === '⌫' ? pressDelete() : pressDigit(d))}
+              disabled={busy && d !== '⌫'}
             >
               {d}
             </button>
           ))}
         </div>
 
-        <div className="auth-error">{error}</div>
+        <div className="auth-error">
+          {busy
+            ? <span className="auth-verifying"><span className="auth-spinner" /> Verifying…</span>
+            : error}
+        </div>
       </div>
     </div>
   );

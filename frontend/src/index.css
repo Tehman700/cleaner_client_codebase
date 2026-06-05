@@ -305,6 +305,24 @@ body {
   animation: fadeIn 0.2s ease;
 }
 
+.auth-verifying {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.auth-spinner {
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--border-strong);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    SHARED LAYOUT
 ───────────────────────────────────────────────────────────────────────────── */
