@@ -7,8 +7,7 @@ from typing import Optional
 
 from app.database import get_db
 from app.models import AnalyticsEvent, Plot, ScheduleEntry, Job, SystemMeta
-from app.analytics_core import compute_summary, render_email_html
-from app.email_utils import send_email
+from app.analytics_core import compute_summary
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -68,22 +67,6 @@ def get_summary(
         role=role or None,
         granularity=granularity if granularity in ("day", "month") else "day",
     )
-
-
-# ── Scheduled: email the daily report (cron protected) ────────────────────────
-
-@router.post("/email-report")
-def email_report(_: None = Depends(_check_cron), db: Session = Depends(get_db)):
-    summary = compute_summary(db, granularity="day")
-    html, text = render_email_html(summary)
-    subject = f"CleanTracking Analytics — {summary['generated_at'][:10]}"
-    try:
-        send_email(subject, html, text)
-    except Exception as e:
-        # Surface the real reason (e.g. SMTP auth failure) — this endpoint is
-        # protected by CRON_SECRET, so returning the detail is safe.
-        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
-    return {"ok": True, "emailed": True, "total_events": summary["total"]}
 
 
 # ── Scheduled: wipe data every N days (cron protected) ────────────────────────

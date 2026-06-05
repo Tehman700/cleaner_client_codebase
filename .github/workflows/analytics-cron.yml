@@ -1,9 +1,8 @@
-name: Analytics Daily Cron
+name: Analytics Auto-Reset
 
 # Runs every day at 19:00 UTC == 00:00 Pakistan time (UTC+5).
-# 1. Wakes the Render backend (free tier sleeps after inactivity)
-# 2. Emails the daily analytics report
-# 3. Wipes analytics data if the 14-day interval has elapsed
+# Wipes the analytics data once the 14-day interval has elapsed
+# (the backend tracks the last reset and only wipes on the boundary).
 on:
   schedule:
     - cron: '0 19 * * *'
@@ -13,23 +12,13 @@ env:
   BACKEND_URL: https://cleaner-client-codebase.onrender.com
 
 jobs:
-  daily:
+  reset:
     runs-on: ubuntu-latest
     steps:
       - name: Wake backend (handle Render cold start)
         run: |
           curl -s --max-time 150 --retry 6 --retry-all-errors --retry-delay 15 \
             "$BACKEND_URL/health" || true
-
-      - name: Email daily analytics report
-        run: |
-          code=$(curl -sS -o /tmp/resp -w "%{http_code}" --max-time 150 \
-            --retry 4 --retry-all-errors --retry-delay 15 \
-            -X POST "$BACKEND_URL/analytics/email-report" \
-            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}")
-          echo "HTTP status: $code"
-          echo "Response: $(cat /tmp/resp)"
-          test "$code" = "200"
 
       - name: Reset analytics if 14 days elapsed
         run: |
