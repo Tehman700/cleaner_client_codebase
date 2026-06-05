@@ -67,3 +67,11 @@ class AnalyticsEvent(Base):
     @meta.setter
     def meta(self, value: dict):
         self.meta_json = json.dumps(value) if value else None
+
+
+class SystemMeta(Base):
+    """Tiny key/value store for system bookkeeping (e.g. last DB reset time)."""
+    __tablename__ = "system_meta"
+
+    key   = Column(String, primary_key=True)
+    value = Column(String, nullable=True)

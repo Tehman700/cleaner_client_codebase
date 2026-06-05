@@ -1,0 +1,31 @@
+name: Analytics Daily Cron
+
+# Runs every day at 19:00 UTC == 00:00 Pakistan time (UTC+5).
+# 1. Wakes the Render backend (free tier sleeps after inactivity)
+# 2. Emails the daily analytics report
+# 3. Wipes the database if the 14-day interval has elapsed
+on:
+  schedule:
+    - cron: '0 19 * * *'
+  workflow_dispatch: {}   # allows manual run from the Actions tab
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake backend (handle Render cold start)
+        run: |
+          curl -s --max-time 150 --retry 6 --retry-all-errors --retry-delay 15 \
+            "${{ secrets.BACKEND_URL }}/health" || true
+
+      - name: Email daily analytics report
+        run: |
+          curl -sS --fail --max-time 150 --retry 4 --retry-all-errors --retry-delay 15 \
+            -X POST "${{ secrets.BACKEND_URL }}/analytics/email-report" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}"
+
+      - name: Reset database if 14 days elapsed
+        run: |
+          curl -sS --fail --max-time 150 --retry 4 --retry-all-errors --retry-delay 15 \
+            -X POST "${{ secrets.BACKEND_URL }}/analytics/maybe-reset" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}"
