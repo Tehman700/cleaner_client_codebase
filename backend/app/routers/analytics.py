@@ -77,7 +77,12 @@ def email_report(_: None = Depends(_check_cron), db: Session = Depends(get_db)):
     summary = compute_summary(db, granularity="day")
     html, text = render_email_html(summary)
     subject = f"CleanTracking Analytics — {summary['generated_at'][:10]}"
-    send_email(subject, html, text)
+    try:
+        send_email(subject, html, text)
+    except Exception as e:
+        # Surface the real reason (e.g. SMTP auth failure) — this endpoint is
+        # protected by CRON_SECRET, so returning the detail is safe.
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
     return {"ok": True, "emailed": True, "total_events": summary["total"]}
 
 
