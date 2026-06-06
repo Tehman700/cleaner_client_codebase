@@ -160,7 +160,8 @@ Fiverr Client/
 ### Jobs
 | Method | Path                     | Description |
 |--------|--------------------------|-------------|
-| GET    | /jobs/{day}/{plot_id}    | Get task/photo state |
+| GET    | /jobs/{day}              | Get all jobs for a day (batch — one request replaces N) |
+| GET    | /jobs/{day}/{plot_id}    | Get task/photo state for a single plot |
 | PUT    | /jobs/{day}/{plot_id}    | Update task completions or upload a photo |
 
 ### Analytics & Tracking
@@ -266,21 +267,16 @@ Two workflows live in `.github/workflows/`. Both run on UTC; Pakistan is UTC+5.
 - **Steps:** wake `/health` → compute PKT date → fetch `/analytics/report.html?secret=CRON_SECRET` → send via Gmail → `POST /analytics/maybe-reset`.
 - **Secrets used:** `CRON_SECRET`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`.
 
-### `keep-warm.yml` — "Keep Backend Warm"
-- **Schedule:** `*/10 4-10 * * *` (every 10 min, 04:00–10:59 UTC = **09:00–16:00 PKT**).
-- **Step:** pings `/health` to keep Render awake during business hours so the dashboard/app loads instantly. Outside this window the backend sleeps.
+### Keep-warm — cron-job.org (replaced GitHub Actions)
+The `keep-warm.yml` GitHub Actions workflow has been **removed**. Keep-warm pinging is now handled by **[cron-job.org](https://cron-job.org)** (free, more precise timing — GitHub Actions can drift several minutes under load).
+
+**cron-job.org setup:**
+- **URL:** `https://cleaner-client-codebase.onrender.com/health`
+- **Crontab expression:** `*/10 7-17 * * *`
+- **What this means:** every 10 minutes, UTC 07:00–17:59 = **08:00–18:59 BST** (UK business hours + 1 hr buffer each side, valid for BST — clocks back to GMT in late October, at which point adjust to `*/10 8-18 * * *` if needed)
 - **No secrets needed** (the endpoint is public and touches no DB).
 
-**Keep-warm cost (windowed, 7 hrs/day):** ~221 Render instance-hours/month (≈ **29%** of the free 750), ~0.4 MB bandwidth, **$0**, and **zero** Neon load (the health check never queries the DB).
-
-> **Two GitHub-scheduler caveats:** (1) scheduled runs can be delayed several minutes under load, so the keep-warm ping may occasionally drift past Render's 15-min sleep threshold and cause a one-off cold start; (2) GitHub disables scheduled workflows after **60 days with no repo commits** (it emails a warning first).
-
-### More reliable keep-warm alternative — cron-job.org
-If you see cold starts during business hours, replace the keep-warm workflow with [cron-job.org](https://cron-job.org) (free, precise timing):
-1. Create a cronjob → URL `https://cleaner-client-codebase.onrender.com/health`
-2. Interval: every **10 minutes**
-3. Time restriction: only **hours 04–10 UTC** (= 09–16 PKT)
-4. Save, then disable the GitHub `Keep Backend Warm` workflow.
+**Keep-warm cost:** ~330 Render instance-hours/month (≈ **44%** of the free 750 hrs), $0, zero Neon load.
 
 ---
 
@@ -396,11 +392,35 @@ Unused variables/imports and implicit-any indexing will fail the Netlify build b
 | Backend (Render)  | https://cleaner-client-codebase.onrender.com |
 | Analytics dashboard | https://cleaner-client-codebase.onrender.com/tracking |
 
-> **Render free-tier note:** the backend sleeps after ~15 minutes of inactivity and takes ~30–50 seconds to wake on the first request. The **keep-warm workflow** mitigates this during 09–16 PKT. A paid Render tier would keep it always-on.
+> **Render free-tier note:** the backend sleeps after ~15 minutes of inactivity and takes ~30–50 seconds to wake on the first request. The **cron-job.org keep-warm** mitigates this during UK business hours. A paid Render tier would keep it always-on.
 
 ---
 
-## 15. Known Limitations / Future Improvements
+## 15. Performance Optimisations Applied
+
+The following changes were made after the initial build to reduce latency and improve reliability.
+
+### Neon pooled connection (manual step — env var only)
+Switch `DATABASE_URL` in Render's environment variables to Neon's **pooled connection string** (port 6432, PgBouncer). This prevents Neon compute cold starts between requests. Both URLs are available in the Neon dashboard under "Connection string" → toggle "Pooled connection".
+
+### DB engine pool settings (`backend/app/database.py`)
+For PostgreSQL, the SQLAlchemy engine is now created with explicit pool settings:
+- `pool_size=5`, `max_overflow=10` — controls concurrent connections
+- `pool_pre_ping=True` — auto-reconnects stale connections after Neon idle timeouts
+- `pool_recycle=300` — recycles connections every 5 minutes before Neon drops them
+
+### Analytics events as background task (`backend/app/routers/analytics.py`)
+`POST /analytics/event` now returns `{"ok": true}` immediately and writes to the DB in a FastAPI `BackgroundTask`. Every user action (task tick, login, photo upload) was previously blocked on this DB write — it now adds zero latency to the hot path.
+
+### Batch jobs endpoint (`backend/app/routers/jobs.py` + frontend)
+Added `GET /jobs/{day}` which queries the schedule and returns all job records for a day in a single request. The frontend (`AppContext.tsx`) now calls this one endpoint instead of firing one `GET /jobs/{day}/{plot_id}` per scheduled plot. Reduces N round trips to 1 every time a day is loaded.
+
+### Cache-Control on stable endpoints (`backend/app/routers/plots.py`, `schedule.py`)
+`GET /plots` and `GET /schedule` now return `Cache-Control: max-age=60, private`. These two lists rarely change during a working day; the browser serves them from cache on repeat calls, eliminating two round trips per page load.
+
+---
+
+## 16. Known Limitations / Future Improvements
 
 - **Photos** are stored as base64 strings in the database. For heavy use, move to object storage (S3 / Cloudflare R2).
 - **PINs/passwords** are compared as plain strings. For higher security, hash them (e.g. bcrypt) and add **rate limiting on `/auth/verify`** (the 4-digit PIN = only 10,000 combinations, so it is brute-forceable without a limit).

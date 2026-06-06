@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Job
+from app.models import Job, ScheduleEntry
 from app.schemas import JobUpdate, JobOut
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
@@ -31,6 +31,12 @@ def _to_out(job: Job) -> JobOut:
         photo=job.photo,
         photo_name=job.photo_name,
     )
+
+
+@router.get("/{day}", response_model=list[JobOut])
+def get_jobs_for_day(day: str, db: Session = Depends(get_db)):
+    entries = db.query(ScheduleEntry).filter(ScheduleEntry.day == day).all()
+    return [_to_out(_get_or_create(day, e.plot_id, db)) for e in entries]
 
 
 @router.get("/{day}/{plot_id}", response_model=JobOut)

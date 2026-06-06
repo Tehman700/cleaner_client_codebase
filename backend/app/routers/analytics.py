@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException, Query, Header
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Header
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -40,12 +40,21 @@ class EventIn(BaseModel):
     metadata: Optional[dict] = None
 
 
+def _write_event(event_type: str, role: str | None, metadata: dict) -> None:
+    from app.database import SessionLocal
+    db = SessionLocal()
+    try:
+        ev = AnalyticsEvent(event_type=event_type, role=role)
+        ev.meta = metadata
+        db.add(ev)
+        db.commit()
+    finally:
+        db.close()
+
+
 @router.post("/event", status_code=201)
-def log_event(body: EventIn, db: Session = Depends(get_db)):
-    ev = AnalyticsEvent(event_type=body.event_type, role=body.role)
-    ev.meta = body.metadata or {}
-    db.add(ev)
-    db.commit()
+def log_event(body: EventIn, background_tasks: BackgroundTasks):
+    background_tasks.add_task(_write_event, body.event_type, body.role, body.metadata or {})
     return {"ok": True}
 
 

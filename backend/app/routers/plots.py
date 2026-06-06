@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Plot
@@ -13,7 +13,8 @@ def _to_out(plot: Plot) -> PlotOut:
 
 
 @router.get("", response_model=list[PlotOut])
-def list_plots(db: Session = Depends(get_db)):
+def list_plots(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "max-age=60, private"
     return [_to_out(p) for p in db.query(Plot).all()]
 
 

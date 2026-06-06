@@ -37,20 +37,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const [rawPlots, rawSched] = await Promise.all([api.getPlots(), api.getSchedule()]);
-      const normSched = rawSched.map(s => ({ id: s.id, day: s.day as ScheduleEntry['day'], plotId: s.plot_id }));
       setPlots(rawPlots);
-      setSchedule(normSched);
+      setSchedule(rawSched.map(s => ({ id: s.id, day: s.day as ScheduleEntry['day'], plotId: s.plot_id })));
 
       if (initialDay) {
-        const entries = normSched.filter(s => s.day === initialDay);
-        if (entries.length) {
-          const results = await Promise.all(entries.map(s => api.getJob(initialDay, s.plotId)));
-          setJobs(prev => {
-            const next = { ...prev };
-            results.forEach(r => { next[jobKey(r.day, r.plot_id)] = normaliseJob(r); });
-            return next;
-          });
-        }
+        const results = await api.getJobsForDay(initialDay);
+        setJobs(prev => {
+          const next = { ...prev };
+          results.forEach(r => { next[jobKey(r.day, r.plot_id)] = normaliseJob(r); });
+          return next;
+        });
       }
     } finally {
       setLoading(false);
@@ -60,10 +56,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const loadJobsForDay = useCallback(async (day: string) => {
     setLoading(true);
     try {
-      let entries: ScheduleEntry[] = [];
-      setSchedule(s => { entries = s.filter(e => e.day === day); return s; });
-      if (!entries.length) return;
-      const results = await Promise.all(entries.map(s => api.getJob(day, s.plotId)));
+      const results = await api.getJobsForDay(day);
       setJobs(prev => {
         const next = { ...prev };
         results.forEach(r => { next[jobKey(r.day, r.plot_id)] = normaliseJob(r); });

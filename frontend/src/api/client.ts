@@ -37,6 +37,8 @@ export const api = {
   removeSchedule: (id: string) =>
     request<void>(`/schedule/${id}`, { method: 'DELETE' }),
 
+  getJobsForDay: (day: string) =>
+    request<RawJob[]>(`/jobs/${day}`),
   getJob: (day: string, plotId: string) =>
     request<RawJob>(`/jobs/${day}/${plotId}`),
   updateJob: (day: string, plotId: string, data: { tasks?: Record<string, boolean>; photo?: string | null; photo_name?: string | null }) =>
