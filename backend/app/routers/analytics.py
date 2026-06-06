@@ -1,14 +1,13 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Header
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from fastapi.responses import HTMLResponse
 from app.database import get_db
 from app.models import AnalyticsEvent, Plot, ScheduleEntry, Job, SystemMeta
-from app.analytics_core import compute_summary, render_email_html, TZ_OFFSET_HOURS
+from app.analytics_core import compute_summary
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -77,16 +76,6 @@ def get_summary(
         role=role or None,
         granularity=granularity if granularity in ("day", "month") else "day",
     )
-
-
-# ── Scheduled: report HTML for the GitHub Actions email step (cron protected) ─
-
-@router.get("/report.html", response_class=HTMLResponse, dependencies=[Depends(_check_cron)])
-def report_html(db: Session = Depends(get_db)):
-    now_local = datetime.utcnow() + timedelta(hours=TZ_OFFSET_HOURS)
-    yesterday = (now_local - timedelta(days=1)).date().isoformat()
-    summary = compute_summary(db, date_from=yesterday, date_to=yesterday, granularity="day")
-    return HTMLResponse(render_email_html(summary, report_date=yesterday))
 
 
 # ── Scheduled: wipe data every N days (cron protected) ────────────────────────

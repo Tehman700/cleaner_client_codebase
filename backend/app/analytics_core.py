@@ -1,6 +1,5 @@
-"""Shared analytics computation: used by both the dashboard API and the
-scheduled email report. Buckets events by a configurable local timezone
-offset (default Pakistan, UTC+5)."""
+"""Shared analytics computation. Buckets events by a configurable local
+timezone offset (default Pakistan, UTC+5)."""
 
 import os
 import statistics
@@ -141,68 +140,3 @@ def compute_summary(
         "event_types":  sorted({e.event_type for e in events}),
         "roles":        sorted({e.role for e in events if e.role}),
     }
-
-
-def render_email_html(summary: dict, report_date: str = None) -> str:
-    """Build the HTML body for the daily analytics email."""
-    by_type = summary["by_type"]
-    by_role = summary["by_role"]
-    ts = summary["timeseries"]
-    spikes = summary["spikes"]
-
-    rows_type = "".join(
-        f"<tr><td style='padding:6px 14px;border-bottom:1px solid #eee'>{k.replace('_',' ').title()}</td>"
-        f"<td style='padding:6px 14px;border-bottom:1px solid #eee;text-align:right;font-weight:700'>{v}</td></tr>"
-        for k, v in sorted(by_type.items(), key=lambda x: -x[1])
-    ) or "<tr><td style='padding:6px 14px'>No events</td><td></td></tr>"
-
-    rows_recent = "".join(
-        f"<tr><td style='padding:5px 12px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#666'>{(e['created_at'] or '')[:16].replace('T',' ')}</td>"
-        f"<td style='padding:5px 12px;border-bottom:1px solid #f0f0f0;font-size:12px'>{e['event_type'].replace('_',' ')}</td>"
-        f"<td style='padding:5px 12px;border-bottom:1px solid #f0f0f0;font-size:12px'>{e['role'] or '-'}</td></tr>"
-        for e in summary["recent"][:15]
-    )
-
-    last = ts[-14:]
-    mx = max((b["count"] for b in last), default=1) or 1
-    blocks = "▁▂▃▄▅▆▇█"
-    spark = "".join(blocks[min(len(blocks) - 1, int((b["count"] / mx) * (len(blocks) - 1)))] for b in last)
-
-    spike_html = ""
-    if spikes:
-        items = "".join(f"<li><b>{s['bucket']}</b> — {s['count']} events</li>" for s in spikes[-5:])
-        spike_html = f"<h3 style='margin:24px 0 8px'>Spikes detected</h3><ul style='color:#333'>{items}</ul>"
-
-    date_label = report_date or summary['generated_at'][:10]
-    second_value = report_date if report_date else summary['today_count']
-    second_label = "Date" if report_date else "Today"
-    second_size = "14px" if report_date else "28px"
-
-    return f"""
-    <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1a1a1a">
-      <h1 style="font-size:22px;margin:0 0 4px">CleanTracking — Daily Report</h1>
-      <p style="color:#888;font-size:13px;margin:0 0 20px">Report for {date_label} (PKT)</p>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-        <tr>
-          <td style="padding:14px;border:1px solid #eee;text-align:center">
-            <div style="font-size:28px;font-weight:800">{summary['total']}</div>
-            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px">Total Events</div>
-          </td>
-          <td style="padding:14px;border:1px solid #eee;text-align:center">
-            <div style="font-size:{second_size};font-weight:800">{second_value}</div>
-            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px">{second_label}</div>
-          </td>
-          <td style="padding:14px;border:1px solid #eee;text-align:center">
-            <div style="font-size:28px;font-weight:800">{by_role.get('admin',0)}/{by_role.get('cleaner',0)}</div>
-            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px">Admin / Cleaner</div>
-          </td>
-        </tr>
-      </table>
-      <h3 style="margin:24px 0 8px">Event breakdown</h3>
-      <table style="width:100%;border-collapse:collapse;border:1px solid #eee">{rows_type}</table>
-      {spike_html}
-      <h3 style="margin:24px 0 8px">Recent activity</h3>
-      <table style="width:100%;border-collapse:collapse;border:1px solid #eee">{rows_recent}</table>
-      <p style="color:#aaa;font-size:11px;margin-top:28px">Automated report from CleanTracking analytics.</p>
-    </div>
-    """
