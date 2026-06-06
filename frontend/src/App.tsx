@@ -32,14 +32,12 @@ function readSession(): Role | null {
 }
 
 function AppContent() {
-  const [screen, setScreen] = useState<Screen>('auth');
+  const [screen, setScreen] = useState<Screen>(() => readSession() ?? 'auth');
   const { loading, loadAll, reset } = useApp();
 
   useEffect(() => {
     const savedRole = readSession();
-    if (savedRole) {
-      loadAll(todayKey()).then(() => setScreen(savedRole));
-    }
+    if (savedRole) loadAll(todayKey());
   }, []);
 
   const handleLogin = async (role: Role) => {
