@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi.responses import HTMLResponse
 from app.database import get_db
 from app.models import AnalyticsEvent, Plot, ScheduleEntry, Job, SystemMeta
-from app.analytics_core import compute_summary, render_email_html
+from app.analytics_core import compute_summary, render_email_html, TZ_OFFSET_HOURS
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -83,8 +83,10 @@ def get_summary(
 
 @router.get("/report.html", response_class=HTMLResponse, dependencies=[Depends(_check_cron)])
 def report_html(db: Session = Depends(get_db)):
-    summary = compute_summary(db, granularity="day")
-    return HTMLResponse(render_email_html(summary))
+    now_local = datetime.utcnow() + timedelta(hours=TZ_OFFSET_HOURS)
+    yesterday = (now_local - timedelta(days=1)).date().isoformat()
+    summary = compute_summary(db, date_from=yesterday, date_to=yesterday, granularity="day")
+    return HTMLResponse(render_email_html(summary, report_date=yesterday))
 
 
 # ── Scheduled: wipe data every N days (cron protected) ────────────────────────

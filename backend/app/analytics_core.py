@@ -143,7 +143,7 @@ def compute_summary(
     }
 
 
-def render_email_html(summary: dict) -> str:
+def render_email_html(summary: dict, report_date: str = None) -> str:
     """Build the HTML body for the daily analytics email."""
     by_type = summary["by_type"]
     by_role = summary["by_role"]
@@ -173,10 +173,15 @@ def render_email_html(summary: dict) -> str:
         items = "".join(f"<li><b>{s['bucket']}</b> — {s['count']} events</li>" for s in spikes[-5:])
         spike_html = f"<h3 style='margin:24px 0 8px'>Spikes detected</h3><ul style='color:#333'>{items}</ul>"
 
+    date_label = report_date or summary['generated_at'][:10]
+    second_value = report_date if report_date else summary['today_count']
+    second_label = "Date" if report_date else "Today"
+    second_size = "14px" if report_date else "28px"
+
     return f"""
     <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;color:#1a1a1a">
-      <h1 style="font-size:22px;margin:0 0 4px">CleanTracking — Daily Analytics</h1>
-      <p style="color:#888;font-size:13px;margin:0 0 20px">Generated {summary['generated_at'][:16].replace('T',' ')} (PKT)</p>
+      <h1 style="font-size:22px;margin:0 0 4px">CleanTracking — Daily Report</h1>
+      <p style="color:#888;font-size:13px;margin:0 0 20px">Report for {date_label} (PKT)</p>
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
         <tr>
           <td style="padding:14px;border:1px solid #eee;text-align:center">
@@ -184,8 +189,8 @@ def render_email_html(summary: dict) -> str:
             <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px">Total Events</div>
           </td>
           <td style="padding:14px;border:1px solid #eee;text-align:center">
-            <div style="font-size:28px;font-weight:800">{summary['today_count']}</div>
-            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px">Today</div>
+            <div style="font-size:{second_size};font-weight:800">{second_value}</div>
+            <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px">{second_label}</div>
           </td>
           <td style="padding:14px;border:1px solid #eee;text-align:center">
             <div style="font-size:28px;font-weight:800">{by_role.get('admin',0)}/{by_role.get('cleaner',0)}</div>
@@ -193,7 +198,6 @@ def render_email_html(summary: dict) -> str:
           </td>
         </tr>
       </table>
-      <p style="font-size:13px;color:#555">Last 14 days: <span style="font-size:20px;letter-spacing:2px">{spark}</span></p>
       <h3 style="margin:24px 0 8px">Event breakdown</h3>
       <table style="width:100%;border-collapse:collapse;border:1px solid #eee">{rows_type}</table>
       {spike_html}
