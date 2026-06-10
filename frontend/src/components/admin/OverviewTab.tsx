@@ -1,42 +1,39 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { todayKey, jobKey, plotStatus, getCurrentWeekDates } from '../../utils/helpers';
+import { todayKey, jobKey, plotStatus } from '../../utils/helpers';
 import DayPills from '../shared/DayPills';
 import StatusBadge from '../shared/StatusBadge';
 
 export default function OverviewTab() {
   const { plots, schedule, jobs, loadJobsForDay } = useApp();
-  const weekDates = getCurrentWeekDates();
-  const [dayAbbr, setDayAbbr] = useState(todayKey()); // "Fri"
-  const dayDate = weekDates[dayAbbr] ?? Object.values(weekDates)[0]; // "2026-06-13"
+  const [day, setDay] = useState(todayKey());
 
   const handleDayChange = async (d: string) => {
-    setDayAbbr(d);
-    const date = weekDates[d];
+    setDay(d);
     const needLoad = schedule
       .filter(s => s.day === d)
-      .some(s => !jobs[jobKey(date, s.plotId)]);
-    if (needLoad) await loadJobsForDay(date);
+      .some(s => !jobs[jobKey(d, s.plotId)]);
+    if (needLoad) await loadJobsForDay(d);
   };
 
   useEffect(() => {
     const needLoad = schedule
-      .filter(s => s.day === dayAbbr)
-      .some(s => !jobs[jobKey(dayDate, s.plotId)]);
-    if (needLoad) loadJobsForDay(dayDate);
+      .filter(s => s.day === day)
+      .some(s => !jobs[jobKey(day, s.plotId)]);
+    if (needLoad) loadJobsForDay(day);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const scheduled = schedule.filter(s => s.day === dayAbbr);
+  const scheduled = schedule.filter(s => s.day === day);
   const total  = scheduled.length;
   const done   = scheduled.filter(s => {
     const plot = plots.find(p => p.id === s.plotId);
-    return plot && plotStatus(dayDate, plot, jobs[jobKey(dayDate, s.plotId)]) === 'done';
+    return plot && plotStatus(day, plot, jobs[jobKey(day, s.plotId)]) === 'done';
   }).length;
 
   return (
     <div className="content">
-      <DayPills activeDay={dayAbbr} onSelect={handleDayChange} />
+      <DayPills activeDay={day} onSelect={handleDayChange} />
 
       <div className="stats-grid">
         <div className="stat-card"><div className="stat-num">{total}</div><div className="stat-label">Scheduled</div></div>
@@ -56,8 +53,8 @@ export default function OverviewTab() {
         scheduled.map(s => {
           const plot = plots.find(p => p.id === s.plotId);
           if (!plot) return null;
-          const job       = jobs[jobKey(dayDate, s.plotId)];
-          const status    = plotStatus(dayDate, plot, job);
+          const job       = jobs[jobKey(day, s.plotId)];
+          const status    = plotStatus(day, plot, job);
           const taskCount = plot.tasks.filter(t => t).length;
           const doneCount = Object.values(job?.tasks ?? {}).filter(Boolean).length;
           const pct       = taskCount ? Math.round(doneCount / taskCount * 100) : 0;

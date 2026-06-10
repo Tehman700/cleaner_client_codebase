@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import ScheduleEntry
@@ -11,8 +11,8 @@ VALID_DAYS = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 
 
 @router.get("", response_model=list[ScheduleOut])
-def list_schedule(db: Session = Depends(get_db)):
-    # response.headers["Cache-Control"] = "max-age=60, private"
+def list_schedule(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "max-age=60, private"
     return db.query(ScheduleEntry).all()
 
 
