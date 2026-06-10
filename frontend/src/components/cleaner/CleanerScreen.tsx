@@ -1,13 +1,14 @@
 import { useApp } from '../../context/AppContext';
-import { todayKey } from '../../utils/helpers';
+import { todayKey, todayDateKey } from '../../utils/helpers';
 import JobCard from './JobCard';
 
 export default function CleanerScreen({ onLogout }: { onLogout: () => void }) {
   const { plots, schedule } = useApp();
-  const today     = todayKey();
+  const todayAbbr = todayKey();       // "Fri" — for schedule filtering
+  const todayDate = todayDateKey();   // "2026-06-13" — for job key
   const now       = new Date();
   const dateLabel = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-  const scheduled = schedule.filter(s => s.day === today);
+  const scheduled = schedule.filter(s => s.day === todayAbbr);
 
   return (
     <div className="app-screen">
@@ -35,7 +36,7 @@ export default function CleanerScreen({ onLogout }: { onLogout: () => void }) {
           scheduled.map(s => {
             const plot = plots.find(p => p.id === s.plotId);
             if (!plot) return null;
-            return <JobCard key={s.id} day={today} plot={plot} sched={s} />;
+            return <JobCard key={s.id} day={todayDate} plot={plot} sched={s} />;
           })
         )}
       </div>

@@ -4,6 +4,26 @@ export function todayKey(): string {
   return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
 }
 
+export function todayDateKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+export function getCurrentWeekDates(): Record<string, string> {
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+  const abbrs = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const result: Record<string, string> = {};
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    result[abbrs[i]] = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  return result;
+}
+
 export function dayLabel(k: string): string {
   const map: Record<string, string> = {
     Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',

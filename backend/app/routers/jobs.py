@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Job, ScheduleEntry
@@ -35,7 +36,11 @@ def _to_out(job: Job) -> JobOut:
 
 @router.get("/{day}", response_model=list[JobOut])
 def get_jobs_for_day(day: str, db: Session = Depends(get_db)):
-    entries = db.query(ScheduleEntry).filter(ScheduleEntry.day == day).all()
+    try:
+        dow = datetime.strptime(day, "%Y-%m-%d").strftime("%a")  # "2026-06-13" → "Fri"
+    except ValueError:
+        raise HTTPException(status_code=400, detail="day must be YYYY-MM-DD")
+    entries = db.query(ScheduleEntry).filter(ScheduleEntry.day == dow).all()
     return [_to_out(_get_or_create(day, e.plot_id, db)) for e in entries]
 
 

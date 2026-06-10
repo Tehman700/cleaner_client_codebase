@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { todayKey } from './utils/helpers';
+import { todayDateKey } from './utils/helpers';
 import AuthScreen    from './components/auth/AuthScreen';
 import AdminScreen   from './components/admin/AdminScreen';
 import CleanerScreen from './components/cleaner/CleanerScreen';
@@ -37,11 +37,11 @@ function AppContent() {
 
   useEffect(() => {
     const savedRole = readSession();
-    if (savedRole) loadAll(todayKey());
+    if (savedRole) loadAll(todayDateKey());
   }, []);
 
   const handleLogin = async (role: Role) => {
-    await loadAll(todayKey());
+    await loadAll(todayDateKey());
     saveSession(role);
     setScreen(role);
   };
